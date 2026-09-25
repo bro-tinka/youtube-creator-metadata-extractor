@@ -1,0 +1,15 @@
+{
+  "name": "extract-youtube-creators",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Discover live YouTube gaming channels, extract public creator details, and update an XLSX workbook incrementally.",
+  "scripts": {
+    "start": "node src/main.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "exceljs": "^4.4.0",
+    "playwright": "^1.49.1"
+  }
+}

@@ -1,0 +1,24 @@
+# YouTube creator extractor
+
+This Node.js script discovers the channels currently listed on the configured YouTube live page, opens each channel, clicks the channel description “More” control, extracts the public creator name, business email, YouTube URL, and Instagram URL, and saves each row immediately to the configured XLSX file.
+
+## Modules
+
+- `src/config.js` loads and validates `.env` settings.
+- `src/youtube.js` discovers live channels and reads expanded channel descriptions.
+- `src/text.js` normalizes links and extracts email addresses with business-context preference.
+- `src/workbook.js` updates or appends rows and writes the workbook after every channel.
+- `src/logger.js` provides timestamped structured logs.
+- `src/main.js` coordinates browser lifecycle, events, retries, graceful shutdown, and per-channel failures.
+
+## Run
+
+1. Install Node.js 18 or newer.
+2. In this folder, run `npm install`.
+3. If Playwright asks for browsers, run `npx playwright install chromium`.
+4. Close the XLSX file if it is open in Excel.
+5. Run `npm start`.
+
+The workbook is written after each successful extraction. If the process is interrupted, already-saved rows remain in the XLSX file.
+
+The script does not sign in, solve CAPTCHAs, or infer missing emails. A malformed address is preserved as displayed in the public description so it can be reviewed manually.

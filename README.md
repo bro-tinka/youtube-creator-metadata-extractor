@@ -1,4 +1,5 @@
-# YouTube creator extractor
+# YouTube creator extractor : version 1.0
+(It extracts YouTube creator's business email , instagram url and youtube channel link)
 
 This Node.js script discovers the channels currently listed on the configured YouTube live page, opens each channel, clicks the channel description “More” control, extracts the public creator name, business email, YouTube URL, and Instagram URL, and saves each row immediately to the configured XLSX file.
 

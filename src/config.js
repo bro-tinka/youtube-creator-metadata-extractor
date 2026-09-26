@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import path from "node:path";
+import { parsePositiveInteger } from "./limits.js";
 
 dotenv.config({ override: true });
 
@@ -32,5 +33,6 @@ export const config = Object.freeze({
   navigationTimeoutMs: integerEnv("NAVIGATION_TIMEOUT_MS", 30_000),
   descriptionTimeoutMs: integerEnv("DESCRIPTION_TIMEOUT_MS", 6_000),
   maxRetries: integerEnv("MAX_RETRIES", 2),
+  maxChannelEmailsToGenerate: parsePositiveInteger(process.env.MAX_CHANNEL_EMAILS_TO_GENERATE),
   logLevel: process.env.LOG_LEVEL?.trim().toLowerCase() || "info",
 });

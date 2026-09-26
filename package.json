@@ -5,7 +5,8 @@
   "type": "module",
   "description": "Discover live YouTube gaming channels, extract public creator details, and update an XLSX workbook incrementally.",
   "scripts": {
-    "start": "node src/main.js"
+    "start": "node src/main.js",
+    "test": "node --test test/limits.test.js"
   },
   "dependencies": {
     "dotenv": "^16.4.7",

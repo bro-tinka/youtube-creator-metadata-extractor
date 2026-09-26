@@ -22,6 +22,9 @@ It should be link to the game page having live channel list for example see the 
 The path where the excel file will be saved
 for e.g yourlocalDirectory/C:users/Desktop/project/output/youtube_creators.xlsx
 
+3. MAX_CHANNEL_EMAILS_TO_GENERATE (optional)
+The maximum number of non-empty business-email results to extract in one run. Channels without a public email do not consume the limit. For example, `5` stops after five email results, while `50` allows up to fifty. If omitted or invalid, the run is unlimited.
+
 
 
 

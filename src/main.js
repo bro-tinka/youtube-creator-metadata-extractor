@@ -3,6 +3,7 @@ import { config } from "./config.js";
 import { createLogger } from "./logger.js";
 import { discoverLiveChannels, scrapeChannel } from "./youtube.js";
 import { WorkbookSink } from "./workbook.js";
+import { processChannels } from "./channel-runner.js";
 
 const logger = createLogger(config.logLevel);
 let stopRequested = false;
@@ -37,18 +38,19 @@ async function run() {
 
   try {
     const channels = await discoverLiveChannels(page, config, logger);
-    logger.info("Discovered live channels", { count: channels.length });
+    logger.info("Discovered live channels", {
+      count: channels.length,
+      maxChannelEmailsToGenerate: config.maxChannelEmailsToGenerate ?? "unlimited",
+    });
 
-    for (const [index, channel] of channels.entries()) {
-      if (stopRequested) break;
-      try {
-        const record = await scrapeChannel(page, channel, config, logger);
-        await sink.upsertAndSave(record);
-        logger.info("Completed channel", { position: index + 1, total: channels.length, name: record.name });
-      } catch (error) {
-        logger.error("Channel failed; continuing", { position: index + 1, channel: channel.url, error: error.message });
-      }
-    }
+    await processChannels({
+      channels,
+      config,
+      logger,
+      sink,
+      scrapeChannel: (channel) => scrapeChannel(page, channel, config, logger),
+      isStopRequested: () => stopRequested,
+    });
   } finally {
     await sink.saveNow();
     await context.close().catch(() => {});

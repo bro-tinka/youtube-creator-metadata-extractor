@@ -1,5 +1,7 @@
 const EMAIL_RE = /[A-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?(?:\.[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?)+/gi;
-const BUSINESS_CONTEXT_RE = /(business|commercial|collab|collaboration|contact|query|queries|sponsor|sponsorship|work|booking|email)/i;
+// Matches emails ending in .com or .in (case-insensitive)
+const ALLOWED_TLD_RE = /\.(com|in)$/i;
+
 
 function cleanEmail(value) {
   return value
@@ -7,23 +9,14 @@ function cleanEmail(value) {
     .replace(/[\s\-–—:;,|)\]}>.!?]+$/u, "");
 }
 
+
 export function extractEmails(text) {
-  return [...new Set((text.match(EMAIL_RE) ?? []).map(cleanEmail).filter(Boolean))];
+  const rawEmails = [...new Set((text.match(EMAIL_RE) ?? []).map(cleanEmail).filter(Boolean))];
+
+  return rawEmails.filter((email) => ALLOWED_TLD_RE.test(email));
 }
 
-export function chooseBusinessEmail(text) {
-  const emails = extractEmails(text);
-  if (emails.length <= 1) return emails[0] ?? "";
 
-  const lines = text.split(/\r?\n/);
-  for (const [index, line] of lines.entries()) {
-    if (!BUSINESS_CONTEXT_RE.test(line)) continue;
-    const nearby = lines.slice(index, index + 3).join(" ");
-    const match = extractEmails(nearby)[0];
-    if (match) return match;
-  }
-  return emails[0];
-}
 
 export function decodeRedirectUrl(href) {
   try {

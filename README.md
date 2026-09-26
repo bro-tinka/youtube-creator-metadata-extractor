@@ -11,6 +11,19 @@ This Node.js script discovers the channels currently listed on the configured Yo
 - `src/logger.js` provides timestamped structured logs.
 - `src/main.js` coordinates browser lifecycle, events, retries, graceful shutdown, and per-channel failures.
 
+## environment file :
+1. LIVE_GAMING_CHANNEL_LINK
+It should be link to the game page having live channel list for example see the url in address bar:
+<img src="public/image.png" alt="LIVE CHANNEL IMAGE" width="800">
+
+
+2. OUTPUT_XLSX_PATH
+The path where the excel file will be saved
+for e.g yourlocalDirectory/C:users/Desktop/project/output/youtube_creators.xlsx
+
+
+
+
 ## Run
 
 1. Install Node.js 18 or newer.

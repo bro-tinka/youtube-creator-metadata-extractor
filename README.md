@@ -1,5 +1,6 @@
-# YouTube creator extractor : version 1.0
-(It extracts YouTube creator's business email , instagram url and youtube channel link)
+# YouTube creator extractor : version 2.0
+- extracts email from live gaming page
+- parallel concurrent jobs
 
 This Node.js script discovers the channels currently listed on the configured YouTube live page, opens each channel, clicks the channel description “More” control, extracts the public creator name, business email, YouTube URL, and Instagram URL, and saves each row immediately to the configured XLSX file.
 
@@ -24,6 +25,9 @@ for e.g yourlocalDirectory/C:users/Desktop/project/output/youtube_creators.xlsx
 
 3. MAX_CHANNEL_EMAILS_TO_GENERATE (optional)
 The maximum number of non-empty business-email results to extract in one run. Channels without a public email do not consume the limit. For example, `5` stops after five email results, while `50` allows up to fifty. If omitted or invalid, the run is unlimited.
+
+4. CONCURRENCY (optional)
+The maximum number of channel tabs scraping at the same time. For example, `10` opens up to ten worker tabs. If omitted or invalid, the default is `1`.
 
 
 

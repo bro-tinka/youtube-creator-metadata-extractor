@@ -26,31 +26,41 @@ async function run() {
   const sink = await new WorkbookSink(config.outputXlsxPath, logger).open();
   const browser = await chromium.launch({ headless: config.headless });
   const context = await browser.newContext({ locale: "en-US" });
-  const page = await context.newPage();
-  page.setDefaultTimeout(config.navigationTimeoutMs);
-
-  page.on("pageerror", (error) => logger.warn("YouTube page error", { error: error.message }));
-  page.on("requestfailed", (request) => logger.debug("Network request failed", { url: request.url(), error: request.failure()?.errorText }));
-  page.on("dialog", async (dialog) => {
-    logger.warn("Unexpected browser dialog dismissed", { type: dialog.type(), message: dialog.message() });
-    await dialog.dismiss().catch(() => {});
-  });
+  const configurePage = (page) => {
+    page.setDefaultTimeout(config.navigationTimeoutMs);
+    page.on("pageerror", (error) => logger.warn("YouTube page error", { error: error.message }));
+    page.on("requestfailed", (request) => logger.debug("Network request failed", { url: request.url(), error: request.failure()?.errorText }));
+    page.on("dialog", async (dialog) => {
+      logger.warn("Unexpected browser dialog dismissed", { type: dialog.type(), message: dialog.message() });
+      await dialog.dismiss().catch(() => {});
+    });
+    return page;
+  };
 
   try {
-    const channels = await discoverLiveChannels(page, config, logger);
+    const discoveryPage = configurePage(await context.newPage());
+    const channels = await discoverLiveChannels(discoveryPage, config, logger);
+    await discoveryPage.close().catch(() => {});
     logger.info("Discovered live channels", {
       count: channels.length,
+      concurrency: config.concurrency,
       maxChannelEmailsToGenerate: config.maxChannelEmailsToGenerate ?? "unlimited",
     });
+
+    const workerPages = await Promise.all(
+      Array.from({ length: Math.min(config.concurrency, channels.length || 1) }, () => context.newPage().then(configurePage)),
+    );
 
     await processChannels({
       channels,
       config,
       logger,
       sink,
-      scrapeChannel: (channel) => scrapeChannel(page, channel, config, logger),
+      concurrency: config.concurrency,
+      scrapeChannel: (channel, workerId) => scrapeChannel(workerPages[workerId], channel, config, logger),
       isStopRequested: () => stopRequested,
     });
+    await Promise.all(workerPages.map((page) => page.close().catch(() => {})));
   } finally {
     await sink.saveNow();
     await context.close().catch(() => {});

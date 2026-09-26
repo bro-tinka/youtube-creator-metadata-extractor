@@ -9,6 +9,13 @@ function cleanEmail(value) {
     .replace(/[\s\-–—:;,|)\]}>.!?]+$/u, "");
 }
 
+export function chooseBusinessEmail(text) {
+  const emails = extractEmails(text);
+  if (emails.length > 0) {
+    return emails[0];
+  }
+  return "";
+}
 
 export function extractEmails(text) {
   const rawEmails = [...new Set((text.match(EMAIL_RE) ?? []).map(cleanEmail).filter(Boolean))];

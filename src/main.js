@@ -7,6 +7,11 @@ import { processChannels } from "./channel-runner.js";
 
 const logger = createLogger(config.logLevel);
 let stopRequested = false;
+let sessionTotals = {
+  generatedEmailCount: 0,
+  entriesSavedThisSession: 0,
+  entriesAddedThisSession: 0,
+};
 
 process.once("SIGINT", () => {
   stopRequested = true;
@@ -51,7 +56,7 @@ async function run() {
       Array.from({ length: Math.min(config.concurrency, channels.length || 1) }, () => context.newPage().then(configurePage)),
     );
 
-    await processChannels({
+    sessionTotals = await processChannels({
       channels,
       config,
       logger,
@@ -65,7 +70,13 @@ async function run() {
     await sink.saveNow();
     await context.close().catch(() => {});
     await browser.close().catch(() => {});
-    logger.info("Run finished", { stopped: stopRequested, output: config.outputXlsxPath });
+    logger.info("Run finished", {
+      stopped: stopRequested,
+      output: config.outputXlsxPath,
+      entriesAddedThisSession: sessionTotals.entriesAddedThisSession,
+      entriesSavedThisSession: sessionTotals.entriesSavedThisSession,
+      generatedEmailCount: sessionTotals.generatedEmailCount,
+    });
   }
 }
 

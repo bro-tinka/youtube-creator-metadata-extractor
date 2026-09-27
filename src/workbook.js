@@ -65,13 +65,15 @@ export class WorkbookSink {
   }
 
   async upsertAndSave(record) {
-    const row = this.findRow(record.youtubeChannel) ?? this.sheet.addRow([]);
+    const existingRow = this.findRow(record.youtubeChannel);
+    const row = existingRow ?? this.sheet.addRow([]);
     this.setIfPresent(row, this.columns.Name, record.name);
     this.setIfPresent(row, this.columns.Email, record.email);
     this.setIfPresent(row, this.columns.YouTubeChannel, record.youtubeChannel);
     this.setIfPresent(row, this.columns.Instagram, record.instagram);
     await this.saveNow();
     this.logger.info("Saved creator immediately", { name: record.name, email: record.email || "", channel: record.youtubeChannel });
+    return { created: !existingRow };
   }
 
   async saveNow() {

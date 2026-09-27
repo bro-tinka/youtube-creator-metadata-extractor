@@ -10,3 +10,11 @@ export function hasEmailGenerationLimitBeenReached(emailCount, limit) {
 export function recordHasEmail(record) {
   return typeof record?.email === "string" && record.email.trim().length > 0;
 }
+
+export function recordHasInstagram(record) {
+  return typeof record?.instagram === "string" && record.instagram.trim().length > 0;
+}
+
+export function recordHasContact(record) {
+  return recordHasEmail(record) || recordHasInstagram(record);
+}

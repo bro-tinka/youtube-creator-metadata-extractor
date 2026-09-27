@@ -41,5 +41,6 @@ The maximum number of channel tabs scraping at the same time. For example, `10` 
 5. Run `npm start`.
 
 The workbook is written after each successful extraction. If the process is interrupted, already-saved rows remain in the XLSX file.
+Rows with neither a business email nor an Instagram link are skipped and are not written to the workbook.
 
 The script does not sign in, solve CAPTCHAs, or infer missing emails. A malformed address is preserved as displayed in the public description so it can be reviewed manually.

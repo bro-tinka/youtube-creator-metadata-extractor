@@ -1,9 +1,11 @@
-import { hasEmailGenerationLimitBeenReached, recordHasEmail } from "./limits.js";
+import { hasEmailGenerationLimitBeenReached, recordHasContact, recordHasEmail } from "./limits.js";
 
 export async function processChannels({ channels, config, logger, sink, scrapeChannel, concurrency = 1, isStopRequested = () => false }) {
   let generatedEmailCount = 0;
   let processedChannelCount = 0;
   let scrapedChannelCount = 0;
+  let entriesSavedThisSession = 0;
+  let entriesAddedThisSession = 0;
   let nextChannelIndex = 0;
   let saveChain = Promise.resolve();
 
@@ -25,6 +27,11 @@ export async function processChannels({ channels, config, logger, sink, scrapeCh
         const record = await scrapeChannel(channel, workerId);
         scrapedChannelCount += 1;
 
+        if (!recordHasContact(record)) {
+          logger.info("Skipped creator without email or Instagram", { name: record.name, channel: channel.url });
+          continue;
+        }
+
         if (recordHasEmail(record)) {
           if (hasEmailGenerationLimitBeenReached(generatedEmailCount, config.maxChannelEmailsToGenerate)) {
             logger.warn("Email limit reached; result will not be saved", { name: record.name, email: record.email });
@@ -39,8 +46,10 @@ export async function processChannels({ channels, config, logger, sink, scrapeCh
           });
         }
 
-        await queueSave(record);
+        const saveResult = await queueSave(record);
         processedChannelCount += 1;
+        entriesSavedThisSession += 1;
+        if (saveResult?.created) entriesAddedThisSession += 1;
         logger.info("Completed channel", {
           position: index + 1,
           total: channels.length,
@@ -64,5 +73,12 @@ export async function processChannels({ channels, config, logger, sink, scrapeCh
     });
   }
 
-  return { generatedEmailCount, processedChannelCount, scrapedChannelCount, workerCount };
+  return {
+    generatedEmailCount,
+    processedChannelCount,
+    scrapedChannelCount,
+    workerCount,
+    entriesSavedThisSession,
+    entriesAddedThisSession,
+  };
 }
